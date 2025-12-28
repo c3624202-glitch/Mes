@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>2 MESES JUNTOS 💖</title>
+    <style>
+      :root {
+        --rosa: #ff6aa2;
+        --magenta: #ff2d55;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+        overflow: hidden;
+      }
+      body {
+        font-family: "Poppins", system-ui, sans-serif;
+        color: #fff;
+      }
+
+      /* NUEVO FONDO: Video de nebulosa profunda (suave y romántico) */
+      #bg-video {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        object-fit: cover;
+        z-index: -3;
+        opacity: 0.7; /* Suave para que no tape el texto */
+      }
+
+      .overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(
+          0,
+          0,
+          20,
+          0.4
+        ); /* Capa oscura para mejor legibilidad */
+        z-index: -2;
+      }
+
+      .hearts {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: -1;
+      }
+      .heart {
+        position: absolute;
+        width: 16px;
+        height: 16px;
+        opacity: 0.75;
+        background: var(--rosa);
+        transform: rotate(45deg);
+        animation: rise 8s linear infinite;
+        filter: drop-shadow(0 0 6px rgba(255, 106, 162, 0.6));
+      }
+      .heart::before,
+      .heart::after {
+        content: "";
+        position: absolute;
+        width: 16px;
+        height: 16px;
+        background: var(--rosa);
+        border-radius: 50%;
+      }
+      .heart::before {
+        left: -8px;
+      }
+      .heart::after {
+        top: -8px;
+      }
+      @keyframes rise {
+        0% {
+          transform: translateY(20vh) scale(0.8) rotate(45deg);
+          opacity: 0;
+        }
+        15% {
+          opacity: 0.9;
+        }
+        100% {
+          transform: translateY(-120vh) scale(1.4) rotate(45deg);
+          opacity: 0;
+        }
+      }
+
+      .wrap {
+        height: 100%;
+        display: grid;
+        place-items: center;
+        padding: 24px;
+        text-align: center;
+      }
+      .card {
+        max-width: 720px;
+        width: 100%;
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        border-radius: 24px;
+        backdrop-filter: blur(12px);
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+        padding: 28px 24px 20px;
+      }
+      .badge {
+        display: inline-block;
+        padding: 6px 12px;
+        border-radius: 999px;
+        font-size: 12px;
+        letter-spacing: 0.4px;
+        background: rgba(255, 106, 162, 0.18);
+        border: 1px solid rgba(255, 106, 162, 0.4);
+        margin-bottom: 10px;
+      }
+      h1 {
+        margin: 8px 0 4px;
+        font-weight: 600;
+        font-size: clamp(28px, 5vw, 40px);
+        text-shadow: 0 4px 20px rgba(255, 45, 85, 0.3);
+      }
+      .type {
+        min-height: 2.2em;
+        white-space: pre-wrap;
+        font-size: clamp(16px, 4vw, 20px);
+        line-height: 1.5;
+      }
+      .counter {
+        margin-top: 10px;
+        font-weight: 300;
+        font-size: clamp(16px, 4vw, 20px);
+        opacity: 0.9;
+      }
+      .buttons {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+        margin-top: 18px;
+        flex-wrap: wrap;
+      }
+      .btn {
+        padding: 12px 20px;
+        border-radius: 14px;
+        font-weight: 600;
+        border: 1px solid transparent;
+        background: linear-gradient(90deg, var(--magenta), var(--rosa));
+        color: #fff;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 8px 24px rgba(255, 45, 85, 0.28);
+        font-size: 16px;
+      }
+      .btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 12px 30px rgba(255, 45, 85, 0.4);
+      }
+      footer {
+        margin-top: 18px;
+        font-size: 12px;
+        opacity: 0.7;
+      }
+      #play-button {
+        position: fixed;
+        bottom: 30px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(255, 51, 102, 0.9);
+        color: white;
+        border: none;
+        padding: 16px 32px;
+        font-size: 18px;
+        border-radius: 50px;
+        cursor: pointer;
+        z-index: 100;
+        box-shadow: 0 6px 20px rgba(255, 51, 102, 0.6);
+        display: none;
+      }
+      @media (max-width: 420px) {
+        .card {
+          padding: 22px 18px 16px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- NUEVO FONDO: Video de nebulosa -->
+    <video id="bg-video" autoplay loop muted playsinline>
+      <source
+        src="https://github.com/Baque2005/Organizador/raw/refs/heads/master/From%20KlickPin%20CF%20Deep%20Space%20Nebula%20%5BVideo%5D%20_%20Deep%20space%20Wallpaper%20space%20Hubble%20space.mp4"
+        type="video/mp4"
+      />
+    </video>
+    <div class="overlay"></div>
+
+    <div class="hearts" id="hearts"></div>
+    <div class="wrap">
+      <div class="card">
+        <span class="badge">Para: <span id="names"></span> 💞</span>
+        <h1>Gracias por estos maravillosos 2 meses 💖</h1>
+        <div id="type" class="type"></div>
+        <div id="counter" class="counter"></div>
+        <div class="buttons">
+          <button class="btn" id="surprise">
+            🌌 Un regalo simple pero con todo mi corazón
+          </button>
+        </div>
+        <footer>Hecho con cariño para mi luna 🌙</footer>
+      </div>
+    </div>
+
+    <!-- AUDIO LOCAL -->
+    <audio id="background-music" loop>
+      <source src="Carta.mp3" type="audio/mpeg" />
+    </audio>
+
+    <button id="play-button">🎵 Toca para escuchar mi voz ❤️</button>
+
+    <script>
+      "use strict";
+
+      const NOMBRE_1 = "my";
+      const NOMBRE_2 = "moon";
+      const FECHA_INICIO = "2025-10-27";
+      const MENSAJE =
+        "Gracias por formar parte de mi vida y por darme el privilegio de estar a tu lado. Cada día contigo es un regalo que valoro con todo mi corazón 💖";
+
+      const namesEl = document.getElementById("names");
+      const typeEl = document.getElementById("type");
+      const counterEl = document.getElementById("counter");
+      const heartsContainer = document.getElementById("hearts");
+      const music = document.getElementById("background-music");
+      const playButton = document.getElementById("play-button");
+
+      namesEl.textContent = `${NOMBRE_1} ${NOMBRE_2}`;
+
+      (function typeWriter(text, delay = 50) {
+        let i = 0;
+        function tick() {
+          typeEl.textContent = text.slice(0, i++);
+          if (i <= text.length) setTimeout(tick, delay);
+        }
+        tick();
+      })(MENSAJE);
+
+      function actualizarContador() {
+        const inicio = new Date(FECHA_INICIO + "T00:00:00");
+        const hoy = new Date();
+        const diff = Math.floor((hoy - inicio) / (1000 * 60 * 60 * 24));
+        if (!isNaN(diff) && diff >= 0) {
+          counterEl.textContent = `Llevamos ${diff} días juntos 💫`;
+        }
+      }
+      actualizarContador();
+      setInterval(actualizarContador, 60000);
+
+      function spawnHeart() {
+        const h = document.createElement("div");
+        h.className = "heart";
+        const size = 10 + Math.random() * 18;
+        h.style.width = size + "px";
+        h.style.height = size + "px";
+        h.style.left = Math.random() * 100 + "vw";
+        h.style.animationDuration = 6 + Math.random() * 6 + "s";
+        h.style.opacity = (0.6 + Math.random() * 0.4).toFixed(2);
+        heartsContainer.appendChild(h);
+        setTimeout(() => h.remove(), 12000);
+      }
+      setInterval(spawnHeart, 350);
+
+      // Música
+      music.volume = 0.4;
+      const tryPlay = music.play();
+      if (tryPlay !== undefined) {
+        tryPlay.catch(() => {
+          playButton.style.display = "block";
+        });
+      }
+      playButton.addEventListener("click", () => {
+        music.play();
+        playButton.style.opacity = "0";
+        setTimeout(() => (playButton.style.display = "none"), 500);
+      });
+
+      // Botón sorpresa
+      document.getElementById("surprise").addEventListener("click", () => {
+        window.open("2.html", "_blank");
+      });
+    </script>
+  </body>
+</html>

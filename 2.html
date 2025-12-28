@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Te Amo Infinitamente</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        width: 100vw;
+        height: 100vh;
+        overflow: hidden;
+        background: #000008;
+      }
+      #app {
+        width: 100vw;
+        height: 100vh;
+        position: fixed;
+        inset: 0;
+      }
+      /* Botón bonito para activar música (por si el autoplay es bloqueado) */
+      #play-button {
+        position: fixed;
+        bottom: 30px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(255, 51, 102, 0.85);
+        color: white;
+        border: none;
+        padding: 16px 32px;
+        font-size: 19px;
+        border-radius: 50px;
+        cursor: pointer;
+        z-index: 100;
+        box-shadow: 0 6px 20px rgba(255, 51, 102, 0.6);
+        font-family: "Arial", sans-serif;
+        transition: all 0.3s ease;
+      }
+      #play-button:hover {
+        background: rgba(255, 51, 102, 1);
+        transform: translateX(-50%) scale(1.08);
+        box-shadow: 0 8px 25px rgba(255, 51, 102, 0.8);
+      }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/FontLoader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/geometries/TextGeometry.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+  </head>
+  <body>
+    <video
+      id="bg-video"
+      autoplay
+      loop
+      muted
+      playsinline
+      style="
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        object-fit: cover;
+        z-index: -2;
+        pointer-events: none;
+      "
+    >
+      <source
+        src="https://github.com/Baque2005/Organizador/raw/refs/heads/master/From%20KlickPin%20CF%20Deep%20Space%20Nebula%20%5BVideo%5D%20_%20Deep%20space%20Wallpaper%20space%20Hubble%20space.mp4"
+        type="video/mp4"
+      />
+    </video>
+
+    <!-- Tu canción local: Amor.mp3 en la misma carpeta -->
+    <audio id="background-music" loop>
+      <source src="Amor.mp3" type="audio/mpeg" />
+      Tu navegador no soporta audio.
+    </audio>
+
+    <!-- Botón opcional para activar música -->
+    <button id="play-button">YOU ARE MY MOON</button>
+    <div id="app" style="position: fixed; inset: 0; z-index: 1"></div>
+
+    <script>
+      // Reproducir música
+      const music = document.getElementById("background-music");
+      const playButton = document.getElementById("play-button");
+
+      // Intentar autoplay
+      music.volume = 0.4;
+      music.play().catch(() => {
+        // Si falla autoplay, mostrar botón
+        playButton.style.display = "block";
+      });
+
+      // Al hacer clic en el botón
+      playButton.addEventListener("click", () => {
+        music.play();
+        playButton.style.opacity = "0";
+        setTimeout(() => {
+          playButton.style.display = "none";
+        }, 500);
+      });
+
+      const width = window.innerWidth;
+      const height = window.innerHeight;
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 200);
+      camera.position.set(0, 14, 34);
+      camera.lookAt(0, 0, 0);
+
+      const renderer = new THREE.WebGLRenderer({
+        antialias: true,
+        alpha: true,
+      });
+      renderer.setClearColor(0x000008, 0);
+      renderer.setSize(width, height);
+      document.querySelector("#app").appendChild(renderer.domElement);
+
+      const controls = new THREE.OrbitControls(camera, renderer.domElement);
+      controls.enableDamping = true;
+      controls.dampingFactor = 0.08;
+      controls.minDistance = 6;
+      controls.maxDistance = 120;
+      controls.target.set(0, 0, 0);
+      controls.update();
+
+      // Estrellas lejanas
+      const starGeometry = new THREE.BufferGeometry();
+      const starCount = 4000;
+      const starPositions = new Float32Array(starCount * 3);
+      for (let i = 0; i < starCount; i++) {
+        const i3 = i * 3;
+        const r = 80 + Math.random() * 70;
+        const theta = Math.random() * Math.PI * 2;
+        const phi = Math.acos(2 * Math.random() - 1);
+        starPositions[i3] = r * Math.sin(phi) * Math.cos(theta);
+        starPositions[i3 + 1] = r * Math.sin(phi) * Math.sin(theta);
+        starPositions[i3 + 2] = r * Math.cos(phi);
+      }
+      starGeometry.setAttribute(
+        "position",
+        new THREE.BufferAttribute(starPositions, 3)
+      );
+      const starMaterial = new THREE.PointsMaterial({
+        color: 0xffffff,
+        size: 0.08,
+        sizeAttenuation: true,
+        depthWrite: false,
+        transparent: true,
+        opacity: 0.7,
+      });
+      const stars = new THREE.Points(starGeometry, starMaterial);
+      scene.add(stars);
+
+      // Galaxia
+      // Galaxia con colores que cambian suavemente con el tiempo
+      const galaxyGeometry = new THREE.BufferGeometry();
+      const count = 80000;
+      const positions = new Float32Array(count * 3);
+      const colors = new Float32Array(count * 3);
+
+      // Colores base que vamos a animar
+      const colorA = new THREE.Color(); // Centro
+      const colorB = new THREE.Color(); // Exterior
+
+      // Guardamos referencia para animar después
+      window.galaxyColors = { colorA, colorB, colorsArray: colors };
+
+      for (let i = 0; i < count; i++) {
+        const i3 = i * 3;
+        const radius = Math.random() * 16;
+        const spinAngle = radius * 1.4;
+        const branchAngle = ((i % 5) / 5) * Math.PI * 2;
+
+        let x = Math.cos(branchAngle + spinAngle) * radius;
+        let z = Math.sin(branchAngle + spinAngle) * radius;
+        let y = (Math.random() - 0.5) * 0.8 * (radius / 16);
+
+        x += (Math.random() - 0.5) * 0.8;
+        z += (Math.random() - 0.5) * 0.8;
+
+        positions[i3] = x;
+        positions[i3 + 1] = y;
+        positions[i3 + 2] = z;
+
+        // Color inicial (se actualizará en animate())
+        colors[i3] = 1; // rojo
+        colors[i3 + 1] = 1; // verde
+        colors[i3 + 2] = 1; // azul (blanco inicial)
+      }
+
+      galaxyGeometry.setAttribute(
+        "position",
+        new THREE.BufferAttribute(positions, 3)
+      );
+      galaxyGeometry.setAttribute(
+        "color",
+        new THREE.BufferAttribute(colors, 3)
+      );
+
+      const galaxyMaterial = new THREE.PointsMaterial({
+        size: 0.025,
+        sizeAttenuation: true,
+        depthWrite: false,
+        blending: THREE.AdditiveBlending,
+        vertexColors: true,
+        transparent: true,
+        opacity: 0.9,
+      });
+
+      const galaxy = new THREE.Points(galaxyGeometry, galaxyMaterial);
+      scene.add(galaxy);
+
+      // Textos con fuente elegante
+      const fontLoader = new THREE.FontLoader();
+      fontLoader.load(
+        "https://cdn.jsdelivr.net/npm/three@0.128.0/examples/fonts/gentilis_bold.typeface.json",
+        function (font) {
+          const textMaterial = new THREE.MeshStandardMaterial({
+            color: 0xffe0fa,
+            emissive: 0xffaaff,
+            emissiveIntensity: 1.6,
+            metalness: 0.9,
+            roughness: 0.1,
+          });
+
+          // Texto principal
+          const textGeometryFront = new THREE.TextGeometry(
+            "TE AMO INFINITAMENTE",
+            {
+              font: font,
+              size: 2.0,
+              height: 0.1,
+              curveSegments: 12,
+              bevelEnabled: true,
+              bevelThickness: 0.15,
+              bevelSize: 0.2,
+              bevelSegments: 5,
+            }
+          );
+          textGeometryFront.center();
+          const textFront = new THREE.Mesh(textGeometryFront, textMaterial);
+          textFront.position.set(0, 14, 0);
+          scene.add(textFront);
+
+          // Mensaje secreto atrás
+          const textGeometrySecret = new THREE.TextGeometry(
+            "SIEMPRE CON VOS MI AMOR",
+            {
+              font: font,
+              size: 2.1,
+              height: 0.1,
+              curveSegments: 12,
+              bevelEnabled: true,
+              bevelThickness: 0.15,
+              bevelSize: 0.2,
+              bevelSegments: 5,
+            }
+          );
+          textGeometrySecret.center();
+          const textSecret = new THREE.Mesh(textGeometrySecret, textMaterial);
+          textSecret.position.set(0, 14, 50);
+          textSecret.rotation.y = Math.PI;
+          scene.add(textSecret);
+
+          const secretLight = new THREE.PointLight(0xff99ff, 3.5, 60);
+          secretLight.position.set(0, 14, -45);
+          scene.add(secretLight);
+        }
+      );
+
+      // Corazón
+      const loader = new THREE.GLTFLoader();
+      loader.load("https://assets.codepen.io/74321/heart.glb", function (gltf) {
+        const heartModel = gltf.scene.children[0];
+        heartModel.scale.set(2.5, 2.5, 2.5);
+        const textureLoader = new THREE.TextureLoader();
+        heartModel.material = new THREE.MeshMatcapMaterial({
+          matcap: textureLoader.load("https://assets.codepen.io/74321/3.png"),
+          color: "#ff3366",
+        });
+        heartModel.position.set(0, 7, 0);
+        scene.add(heartModel);
+
+        const heartLight = new THREE.PointLight(0xff3366, 1.8, 30);
+        heartLight.position.set(0, 7, 8);
+        scene.add(heartLight);
+
+        const heartGlow = new THREE.PointLight(0xff99cc, 5, 40);
+        heartGlow.position.set(0, 7, 0);
+        scene.add(heartGlow);
+
+        window.heartModel = heartModel;
+      });
+
+      // Luces
+      const ambientLight = new THREE.AmbientLight(0xffffff, 1.2);
+      scene.add(ambientLight);
+      const galaxyLight = new THREE.PointLight(0x9bb8ff, 2, 120);
+      galaxyLight.position.set(0, 12, 18);
+      scene.add(galaxyLight);
+      const warmLight = new THREE.PointLight(0xffe0b0, 1.3, 80);
+      warmLight.position.set(-18, 8, 10);
+      scene.add(warmLight);
+      const spotLight = new THREE.SpotLight(
+        0xffe0fa,
+        2.5,
+        100,
+        Math.PI / 6,
+        0.5,
+        2
+      );
+      spotLight.position.set(0, 20, 20);
+      scene.add(spotLight);
+
+      // Estrellas fugaces y animación (igual)
+      const shootingStars = [];
+      const maxShootingStars = 18;
+      function createShootingStar() {
+        const geometry = new THREE.BufferGeometry();
+        const length = 12 + Math.random() * 10;
+        const dir = Math.random() * Math.PI * 2;
+        const phi = Math.acos(2 * Math.random() - 1);
+        const r = 90 + Math.random() * 50;
+        const x0 = r * Math.sin(phi) * Math.cos(dir);
+        const y0 = r * Math.sin(phi) * Math.sin(dir);
+        const z0 = r * Math.cos(phi);
+        const dx = Math.cos(dir) * Math.sin(phi);
+        const dy = Math.sin(dir) * Math.sin(phi);
+        const dz = Math.cos(phi);
+
+        const positions = new Float32Array([
+          x0,
+          y0,
+          z0,
+          x0 + dx * length,
+          y0 + dy * length,
+          z0 + dz * length,
+        ]);
+        geometry.setAttribute(
+          "position",
+          new THREE.BufferAttribute(positions, 3)
+        );
+        const material = new THREE.LineBasicMaterial({
+          color: 0xffffcc,
+          transparent: true,
+          opacity: 1,
+        });
+        const line = new THREE.Line(geometry, material);
+        scene.add(line);
+
+        const speed = 1.2 + Math.random() * 1.1;
+        shootingStars.push({
+          mesh: line,
+          x: x0,
+          y: y0,
+          z: z0,
+          dx,
+          dy,
+          dz,
+          speed,
+          life: 0,
+          maxLife: 1.1 + Math.random() * 0.5,
+        });
+      }
+
+      function animate() {
+        requestAnimationFrame(animate);
+        galaxy.rotation.y += 0.0008;
+
+        // Animación de cambio de color suave de la galaxia
+        const time = Date.now() * 0.0005; // Velocidad del cambio (ajusta este número)
+
+        // Ciclo entre colores románticos: rosado → violeta → azul → púrpura → rosado...
+        window.galaxyColors.colorA.setHSL(0.9 + 0.1 * Math.sin(time), 0.9, 0.7); // Centro: tono cálido
+        window.galaxyColors.colorB.setHSL(
+          0.7 + 0.2 * Math.sin(time + 1),
+          0.8,
+          0.5
+        ); // Exterior: tono frío
+
+        const colors = window.galaxyColors.colorsArray;
+
+        for (let i = 0; i < count; i++) {
+          const i3 = i * 3;
+          const radius = Math.sqrt(positions[i3] ** 2 + positions[i3 + 2] ** 2); // distancia al centro
+
+          const mixedColor = window.galaxyColors.colorA.clone();
+          mixedColor.lerp(window.galaxyColors.colorB, radius / 16);
+
+          colors[i3] = mixedColor.r;
+          colors[i3 + 1] = mixedColor.g;
+          colors[i3 + 2] = mixedColor.b;
+        }
+
+        galaxyGeometry.attributes.color.needsUpdate = true; // Importante: actualizar colores
+
+        if (window.heartModel) {
+          window.heartModel.rotation.y += 0.003;
+          window.heartModel.rotation.x += 0.0;
+        }
+
+        for (let i = shootingStars.length - 1; i >= 0; i--) {
+          const s = shootingStars[i];
+          s.x += s.dx * s.speed;
+          s.y += s.dy * s.speed;
+          s.z += s.dz * s.speed;
+          s.life += 0.016;
+
+          const positions = s.mesh.geometry.attributes.position.array;
+          positions[0] = s.x;
+          positions[1] = s.y;
+          positions[2] = s.z;
+          positions[3] = s.x + s.dx * 8;
+          positions[4] = s.y + s.dy * 8;
+          positions[5] = s.z + s.dz * 8;
+          s.mesh.geometry.attributes.position.needsUpdate = true;
+
+          s.mesh.material.opacity = Math.max(
+            0,
+            0.85 * (1 - s.life / s.maxLife)
+          );
+
+          if (s.life > s.maxLife) {
+            scene.remove(s.mesh);
+            shootingStars.splice(i, 1);
+          }
+        }
+
+        if (shootingStars.length < maxShootingStars && Math.random() < 0.35) {
+          createShootingStar();
+        }
+
+        controls.update();
+        renderer.render(scene, camera);
+      }
+      animate();
+
+      window.addEventListener("resize", () => {
+        const width = window.innerWidth;
+        const height = window.innerHeight;
+        camera.aspect = width / height;
+        camera.updateProjectionMatrix();
+        renderer.setSize(width, height);
+      });
+    </script>
+  </body>
+</html>
